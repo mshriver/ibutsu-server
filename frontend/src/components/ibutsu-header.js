@@ -252,6 +252,7 @@ const IbutsuHeader = () => {
         >
           <ToolbarItem spacer={{ default: 'spacerSm' }}>
             <Button
+              ouiaId="header-about-button"
               aria-label="About"
               onClick={() => {
                 setIsAboutOpen(!isAboutOpen);
@@ -269,6 +270,7 @@ const IbutsuHeader = () => {
           </ToolbarItem>
           <ToolbarItem spacer={{ default: 'spacerSm' }}>
             <Button
+              ouiaId="header-api-button"
               component="a"
               href={Settings.serverUrl + '/ui/'}
               variant={ButtonVariant.tertiary}
@@ -285,7 +287,7 @@ const IbutsuHeader = () => {
             </Button>
           </ToolbarItem>
           <ToolbarItem spacer={{ default: 'spacerSm' }}>
-            <ToggleGroup>
+            <ToggleGroup ouiaId="header-theme-toggle">
               <ToggleGroupItem
                 aria-label="Light theme"
                 icon={
@@ -315,7 +317,7 @@ const IbutsuHeader = () => {
             </ToggleGroup>
           </ToolbarItem>
           <ToolbarItem id="user-dropdown">
-            <UserDropdown />
+            <UserDropdown ouiaId="header-user-dropdown" />
           </ToolbarItem>
         </ToolbarGroup>
       </ToolbarContent>
@@ -325,6 +327,7 @@ const IbutsuHeader = () => {
   return (
     <React.Fragment>
       <AboutModal
+        ouiaId="header-about"
         isOpen={isAboutOpen}
         onClose={() => {
           setIsAboutOpen(!isAboutOpen);
@@ -375,12 +378,13 @@ const IbutsuHeader = () => {
           * Note: artifact files (screenshots, logs) are retained for 3 months
         </p>
       </AboutModal>
-      <Masthead>
+      <Masthead ouiaId="header-masthead">
         <MastheadToggle>
           <PageToggleButton
             variant="plain"
             aria-label="Global navigation"
             id="vertical-nav-toggle"
+            ouiaId="header-nav-toggle"
           >
             <Icon>
               <BarsIcon />
@@ -388,7 +392,7 @@ const IbutsuHeader = () => {
           </PageToggleButton>
         </MastheadToggle>
         <MastheadMain>
-          <MastheadBrand href="/">
+          <MastheadBrand href="/" ouiaId="header-masthead-brand">
             <Brand src="/images/ibutsu-wordart-164.png" alt="Ibutsu" />
           </MastheadBrand>
         </MastheadMain>

@@ -426,6 +426,7 @@ const Login = () => {
             validated={isValidEmail ? 'default' : 'error'}
           >
             <TextInput
+              ouiaId='login-input-email'
               isRequired
               type="email"
               id="email"
@@ -446,6 +447,7 @@ const Login = () => {
             <InputGroup>
               {!isPasswordVisible && (
                 <TextInput
+                  ouiaId='login-input-password'
                   isRequired
                   type="password"
                   id="password"
@@ -459,6 +461,7 @@ const Login = () => {
               )}
               {isPasswordVisible && (
                 <TextInput
+                  ouiaId='login-input-password-visible'
                   isRequired
                   type="text"
                   id="password"
@@ -484,6 +487,7 @@ const Login = () => {
           </FormGroup>
           <ActionGroup>
             <Button
+              ouiaId='login-button'
               variant="primary"
               isBlock
               isLoading={isLoggingIn}
