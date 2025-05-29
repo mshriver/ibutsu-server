@@ -55,6 +55,7 @@
     "@babel/preset-react": "^7.24.7",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.29.0",
+    "@playwright/test": "^1.52.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",
     "cypress": "^14.4.1",
@@ -76,7 +77,9 @@
     "devserver": "./bin/write-version-file.cjs && CI=true DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "lint": "eslint",
     "format": "prettier \"src/**/*.{js,html}\" --write",
-    "format-check": "prettier \"src/**/*.{js,html}\" --check"
+    "format-check": "prettier \"src/**/*.{js,html}\" --check",
+    "playtest": "playwright test",
+    "playtest:debug": "playwright test --debug"
   },
   "browserslist": {
     "production": [
