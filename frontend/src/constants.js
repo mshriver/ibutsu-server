@@ -192,5 +192,5 @@ export const CHART_COLOR_MAP = {
   xfailed: 'var(--pf-v5-chart-color-purple-200)',
   xpassed: 'var(--pf-v5-chart-color-blue-100)',
   manual: 'var(--pf-v5-chart-color-cyan-500)',
-  default: 'var(--pf-v5-chart-color-organge-500)',
+  default: 'var(--pf-v5-chart-color-orange-500)',
 };

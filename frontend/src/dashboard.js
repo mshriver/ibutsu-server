@@ -37,12 +37,17 @@ import EditWidgetModal from './components/edit-widget-modal';
 import DeleteModal from './components/delete-modal';
 import { useWidgets } from './components/hooks/useWidgets';
 import { IbutsuContext } from './components/contexts/ibutsuContext';
+import {
+  WidgetProvider,
+  useWidgetContext,
+} from './components/contexts/widgetContext';
+import { useWidgetRefresh } from './components/hooks/useWidgetRefresh';
 
-import { nanoid } from 'nanoid/non-secure';
-
-const Dashboard = () => {
+const DashboardContent = () => {
   const { defaultDashboard, primaryObject } = useContext(IbutsuContext);
   const { dashboard_id, project_id } = useParams();
+  const { updateWidget, deleteWidget, setWidgets } = useWidgetContext();
+  useWidgetRefresh({ dashboard_id, primaryObject });
 
   const navigate = useNavigate();
 
@@ -66,7 +71,6 @@ const Dashboard = () => {
   const [selectInputValue, setSelectInputValue] = useState('');
   const [selectFilterValue, setSelectFilterValue] = useState('');
   const selectInputRef = useRef();
-  const [loadKey, setLoadKey] = useState(nanoid(6));
 
   const onDeleteWidgetClick = (id) => {
     setIsDeleteWidgetOpen(true);
@@ -101,12 +105,11 @@ const Dashboard = () => {
     };
   };
 
-  // update widgets
+  // Get widgets using new hook
   const { widgets, widgetComponents } = useWidgets({
     dashboardId: selectedDashboard?.id,
     editCallback: onEditWidgetClick,
     deleteCallback: onDeleteWidgetClick,
-    loadKey,
   });
 
   // Fetch all dashboards for the project
@@ -268,21 +271,25 @@ const Dashboard = () => {
           [Settings.serverUrl, 'widget-config'],
           widgetData,
         );
-        await HttpClient.handleResponse(response);
-        setIsNewWidgetOpen(false); // wait to close modal until widget is saved
+        const savedWidget = await HttpClient.handleResponse(response);
+        updateWidget(savedWidget); // Update widget in context
+        setIsNewWidgetOpen(false); // Close modal after widget is saved
       } catch (error) {
         console.error(error);
       }
     };
 
     postWidget(widgetData);
-    setLoadKey(nanoid(6)); // reset load key to re-fetch widgets
   };
 
   const onEditWidgetSave = (editedData) => {
     if (!editedData.project_id && primaryObject) {
       editedData.project_id = primaryObject.id;
     }
+
+    // Close modal before starting the async operation
+    setIsEditModalOpen(false);
+
     const putWidget = async (editedData) => {
       try {
         const response = await HttpClient.put(
@@ -290,14 +297,55 @@ const Dashboard = () => {
           '',
           editedData,
         );
-        await HttpClient.handleResponse(response);
+        const updatedWidget = await HttpClient.handleResponse(response);
+
+        // Include edited data since the server response may not include all params
+        const completeWidgetData = {
+          ...updatedWidget,
+          id: currentWidget,
+          params: {
+            ...editedData.params, // Use the exact params from the edit form
+            project: primaryObject?.id,
+          },
+        };
+
+        // Update widget in context, this will trigger the useEffect in useWidgets
+        // which will refresh all widgets with the latest data
+        updateWidget(completeWidgetData);
+
+        // After updating the widget in the context, force a complete refresh
+        // with a slight delay to avoid race conditions
+        setTimeout(() => {
+          const refreshWidgets = async () => {
+            try {
+              const response = await HttpClient.get(
+                [Settings.serverUrl, 'widget-config'],
+                {
+                  type: 'widget',
+                  filter: `dashboard_id=${selectedDashboard?.id}`,
+                },
+              );
+              const data = await HttpClient.handleResponse(response);
+              const refreshedWidgets = data?.widgets.map((w) => ({
+                ...w,
+                params: {
+                  ...w.params,
+                  project: primaryObject?.id,
+                },
+              }));
+              setWidgets(refreshedWidgets);
+            } catch (refreshError) {
+              console.error('Error refreshing widgets:', refreshError);
+            }
+          };
+          refreshWidgets();
+        }, 300); // Delay refresh to avoid race conditions
       } catch (error) {
-        console.error(error);
+        console.error('Error updating widget:', error);
       }
     };
+
     putWidget(editedData);
-    setLoadKey(nanoid(6)); // reset load key to re-fetch widgets
-    setIsEditModalOpen(false);
   };
 
   useEffect(() => {
@@ -526,7 +574,9 @@ const Dashboard = () => {
         isOpen={isDeleteWidgetOpen}
         onClose={() => {
           setIsDeleteWidgetOpen(false);
-          setLoadKey(nanoid(6)); // reset load key to re-fetch widgets
+        }}
+        onDelete={() => {
+          deleteWidget(currentWidget);
         }}
         toDeletePath={['widget-config']}
         toDeleteId={currentWidget}
@@ -537,7 +587,6 @@ const Dashboard = () => {
           onSave={onEditWidgetSave}
           onClose={() => {
             setIsEditModalOpen(false);
-            setLoadKey(nanoid(6)); // reset load key to re-fetch widgets
           }}
           data={editWidgetData}
         />
@@ -545,6 +594,14 @@ const Dashboard = () => {
         ''
       )}
     </React.Fragment>
+  );
+};
+
+const Dashboard = (props) => {
+  return (
+    <WidgetProvider>
+      <DashboardContent {...props} />
+    </WidgetProvider>
   );
 };
 

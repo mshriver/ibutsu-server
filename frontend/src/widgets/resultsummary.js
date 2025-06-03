@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import { ChartDonut, ChartLegend } from '@patternfly/react-charts';
@@ -26,27 +26,56 @@ const ResultSummaryWidget = ({ title, params, onDeleteClick, onEditClick }) => {
   const [isError, setIsError] = useState(false);
   const [fetching, setFetching] = useState(true);
 
+  // Add useRef for tracking last fetch time to prevent excessive refreshes
+  const lastFetchRef = useRef(0);
+
   useEffect(() => {
+    // Skip if we've fetched recently (throttling)
+    const now = Date.now();
+    const minInterval = 2000; // Minimum 2 seconds between refreshes
+
+    // If we've fetched recently and we're not currently fetching, skip
+    if (now - lastFetchRef.current < minInterval && !fetching) {
+      return;
+    }
+
+    // Reset state and mark fetch time
     setIsError(false);
+    setFetching(true);
+    lastFetchRef.current = now;
+
     const fetchSummary = async () => {
       try {
+        // Add a timestamp parameter to avoid caching issues
+        const fetchParams = {
+          ...params,
+          _ts: now // Use the same timestamp throughout
+        };
+
         const response = await HttpClient.get(
           [Settings.serverUrl, 'widget', 'result-summary'],
-          params,
+          fetchParams,
         );
+
         const data = await HttpClient.handleResponse(response);
         setSummary(data);
         setIsError(false);
       } catch (error) {
         setIsError(true);
-        console.error(error);
+        console.error('Error fetching result summary:', error);
       }
       setFetching(false);
     };
+
     if (params) {
-      fetchSummary();
+      // Use a longer delay to avoid excessive refreshes
+      const debouncer = setTimeout(() => {
+        fetchSummary();
+      }, 500); // Increased debounce time from 100ms to 500ms
+
+      return () => clearTimeout(debouncer);
     }
-  }, [params]);
+  }, [params, fetching]); // Include fetching in the dependency array
 
   // Create chart data and legend data with appropriate color mapping
   const chartData =
