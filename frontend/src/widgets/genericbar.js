@@ -5,31 +5,45 @@ import {
   Chart,
   ChartAxis,
   ChartBar,
+  ChartContainer,
   ChartLegend,
   ChartStack,
   ChartTooltip,
 } from '@patternfly/react-charts';
-import { Card, CardBody, CardFooter, Text } from '@patternfly/react-core';
+import {
+  Card,
+  CardBody,
+  CardFooter,
+  Flex,
+  FlexItem,
+  Grid,
+  GridItem,
+  Text,
+} from '@patternfly/react-core';
 
 import { HttpClient } from '../services/http';
 import { Settings } from '../settings';
 import { toTitleCase } from '../utilities';
 import WidgetHeader from '../components/widget-header';
 import ParamDropdown from '../components/param-dropdown';
-import { CHART_COLOR_MAP } from '../constants';
+import { CHART_COLOR_MAP, CHART_THEME } from '../constants';
+
+const SIZE_FAMILY = {
+  fontSize: CHART_THEME.fontSize.small,
+  fontFamily: CHART_THEME.fontFamily.base,
+};
 
 const GenericBarWidget = ({
   barWidth = 30,
   dropdownItems = ['component', 'env', 'metadata.jenkins.job_name'],
-  fontSize,
   height,
   hideDropdown,
   horizontal,
   padding = {
     bottom: 30,
-    left: 150,
-    right: 15,
-    top: 20,
+    left: 30,
+    right: 10,
+    top: 40,
   },
   params = {},
   percentData,
@@ -43,7 +57,6 @@ const GenericBarWidget = ({
   onEditClick,
 }) => {
   const [data, setData] = useState({});
-  const [barCharts, setBarCharts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [genericBarError, setGenericBarError] = useState(false);
   const [groupField, setGroupField] = useState(params.group_field);
@@ -66,7 +79,7 @@ const GenericBarWidget = ({
         console.error(error);
       }
     };
-    if (widgetEndpoint && params) {
+    if (widgetEndpoint && Object.keys(params).length) {
       const debouncer = setTimeout(() => {
         fetchJobData();
       }, 50);
@@ -75,16 +88,18 @@ const GenericBarWidget = ({
   }, [widgetEndpoint, params]);
 
   const legendData = useMemo(() => {
+    console.log('Generating legend data: ', data);
     return Object.keys(data || {}).map((key) => ({
       name: toTitleCase(key),
       symbol: {
         fill: CHART_COLOR_MAP[key] || CHART_COLOR_MAP.default,
       },
+      style: SIZE_FAMILY,
     }));
   }, [data]);
 
-  useEffect(() => {
-    const barCharts = [];
+  const barCharts = useMemo(() => {
+    const chartArray = [];
 
     const getLabels = () => {
       if (percentData) {
@@ -110,16 +125,19 @@ const GenericBarWidget = ({
           });
         }
         if (barData.length !== 0) {
-          barCharts.push(
+          chartArray.push(
             <ChartBar
+              responsive
+              containerComponent={<ChartContainer responsive />}
+              alignment="middle"
               key={test_state}
-              barWidth={barWidth}
               data={barData}
               legendData={legendData}
               style={{
                 data: {
                   fill: CHART_COLOR_MAP[test_state] || CHART_COLOR_MAP.default,
                 },
+                labels: SIZE_FAMILY,
               }}
               sortKey={(datum) => `${datum.x}`}
               sortOrder={sortOrder}
@@ -129,7 +147,10 @@ const GenericBarWidget = ({
                 <ChartTooltip
                   dx={horizontal ? -10 : 0}
                   dy={horizontal ? 0 : -10}
-                  style={{ fill: 'white', fontSize: fontSize - 2 || 14 }}
+                  style={{
+                    fill: 'white',
+                    ...SIZE_FAMILY,
+                  }}
                 />
               }
             />,
@@ -137,27 +158,21 @@ const GenericBarWidget = ({
         }
       }
     }
-    setBarCharts(barCharts);
-  }, [
-    data,
-    barWidth,
-    fontSize,
-    horizontal,
-    sortOrder,
-    percentData,
-    xLabelTooltip,
-    legendData,
-  ]);
+    return chartArray;
+  }, [percentData, xLabelTooltip, data, legendData, sortOrder, horizontal]);
 
-  const getChartHeight = (numBars) => {
-    if (numBars > 10) {
-      return numBars * 30;
+  const chartHeight = useMemo(() => {
+    if (height) {
+      return height;
+    } else if (horizontal) {
+      const numBars = Object.keys(data['passed']).length;
+      return Math.max(numBars * 30, 300);
     } else {
-      return 300;
+      return 200;
     }
-  };
+  }, [data, height, horizontal]);
 
-  const getDropdowns = () => {
+  const getDropdowns = useMemo(() => {
     if (hideDropdown) {
       return null;
     } else {
@@ -178,68 +193,75 @@ const GenericBarWidget = ({
         </div>
       );
     }
-  };
+  }, [dropdownItems, groupField, hideDropdown, weeks]);
 
   return (
-    <Card>
-      <WidgetHeader
-        title={title}
-        onEditClick={onEditClick}
-        onDeleteClick={onDeleteClick}
-      />
-      <CardBody data-id="recent-runs">
-        {genericBarError && <p>Error fetching data</p>}
-        {!genericBarError && isLoading && (
-          <Text component="h2">Loading ...</Text>
-        )}
-        {!genericBarError && !isLoading && (
-          <Chart
-            domainPadding={horizontal ? { x: 20 } : { y: 20 }}
-            padding={padding}
-            height={
-              height || getChartHeight(Object.keys(data['passed']).length)
-            }
-          >
-            <ChartAxis
-              label={xLabel}
-              fixLabelOverlap={!horizontal}
-              style={{
-                tickLabels: { fontSize: fontSize - 2 || 12 },
-                axisLabel: { fontSize: fontSize || 12 },
-              }}
-            />
-            <ChartAxis
-              label={yLabel}
-              dependentAxis
-              style={{
-                tickLabels: { fontSize: fontSize - 2 || 12 },
-                axisLabel: { fontSize: fontSize || 12 },
-              }}
-            />
-            <ChartStack>{barCharts}</ChartStack>
-          </Chart>
-        )}
-      </CardBody>
-      <CardFooter>
-        <ChartLegend
-          height={30}
-          data={legendData}
-          style={{
-            labels: { fontFamily: 'RedHatText', fontSize: fontSize - 2 || 12 },
-            title: { fontFamily: 'RedHatText' },
-          }}
-        />
-        {getDropdowns()}
-      </CardFooter>
-    </Card>
+    <Grid>
+      <GridItem span={12}>
+        <Card>
+          <WidgetHeader
+            title={title}
+            onEditClick={onEditClick}
+            onDeleteClick={onDeleteClick}
+          />
+          <CardBody data-id="recent-runs">
+            {genericBarError && <p>Error fetching data</p>}
+            {!genericBarError && isLoading && (
+              <Text component="h2">Loading ...</Text>
+            )}
+            {!genericBarError && !isLoading && (
+              <Chart
+                domainPadding={horizontal ? { x: 20 } : { y: 20 }}
+                padding={padding}
+                height={chartHeight}
+                containerComponent={<ChartContainer responsive />}
+                legendData={legendData}
+                legendPosition="bottom"
+                legendAllowWrap={true}
+              >
+                <ChartAxis
+                  label={xLabel}
+                  style={{
+                    tickLabels: SIZE_FAMILY,
+                    axisLabel: SIZE_FAMILY,
+                  }}
+                />
+                <ChartAxis
+                  label={yLabel}
+                  dependentAxis
+                  style={{
+                    tickLabels: SIZE_FAMILY,
+                    axisLabel: SIZE_FAMILY,
+                  }}
+                />
+                <ChartStack>{barCharts}</ChartStack>
+              </Chart>
+            )}
+          </CardBody>
+          <CardFooter>
+            <Flex>
+              <FlexItem>
+                <ChartLegend
+                  containerComponent={<ChartContainer responsive />}
+                  orientation="horizontal"
+                  style={{
+                    labels: SIZE_FAMILY,
+                  }}
+                />
+              </FlexItem>
+              <FlexItem>{getDropdowns}</FlexItem>
+            </Flex>
+          </CardFooter>
+        </Card>
+      </GridItem>
+    </Grid>
   );
 };
 
 GenericBarWidget.propTypes = {
   barWidth: PropTypes.number,
   dropdownItems: PropTypes.array,
-  fontSize: PropTypes.number,
-  height: PropTypes.number,
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   hideDropdown: PropTypes.bool,
   horizontal: PropTypes.bool,
   onDeleteClick: PropTypes.func,

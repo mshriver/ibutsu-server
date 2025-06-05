@@ -196,3 +196,16 @@ export const CHART_COLOR_MAP = {
 };
 
 export const FILE_IMPORT_KEY = 'importFile';
+
+export const CHART_THEME = {
+  fontSize: {
+    small: '8', // 12px
+    base: '10', // 14px
+    large: '12', // 16px
+    title: '14', // 18px
+  },
+  fontFamily: {
+    base: 'RedHatText',
+    heading: 'RedHatDisplay',
+  },
+};

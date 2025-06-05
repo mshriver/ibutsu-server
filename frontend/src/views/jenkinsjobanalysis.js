@@ -14,7 +14,7 @@ import ParamDropdown from '../components/param-dropdown';
 import { useTabHook } from '../components/hooks/useTab';
 import { FilterContext } from '../components/contexts/filterContext';
 
-const DEFAULT_BAR = 8;
+const DEFAULT_BAR = 20;
 
 const SHORT_BUILDS = [10, 20, 30, 40];
 const LONG_BUILDS = [...SHORT_BUILDS, 70, 150];
@@ -183,16 +183,8 @@ const JenkinsJobAnalysisView = ({ view, defaultTab = 'heatmap' }) => {
               barWidth={barWidth}
               horizontal={false}
               xLabelTooltip="Build"
-              height={180}
               yLabel="Test counts"
               xLabel="Build number"
-              padding={{
-                bottom: 50,
-                left: 50,
-                right: 20,
-                top: 20,
-              }}
-              fontSize={9}
               sortOrder="ascending"
             />
           )}
