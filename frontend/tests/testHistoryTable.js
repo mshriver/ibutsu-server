@@ -1,40 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, createTestResult } from './fixtures.js';
 import { v4 as uuidv4 } from 'uuid';
 import process from 'node:process';
-
-/**
- * Helper function to create test results with different attributes
- * @param {string} testId - The ID of the test
- * @param {string} result - The result of the test (passed, failed, error, skipped, xfailed, xpassed)
- * @param {string} startTime - The start time of the test in ISO format
- * @returns {Object} A test result object
- */
-function createTestResult(testId, result, startTime) {
-  return {
-    id: uuidv4(),
-    test_id: testId,
-    component: 'patchman',
-    duration: 5.38,
-    env: 'stage',
-    result: result,
-    start_time: startTime,
-    project_id: '376264a3-0aa2-4ffd-858c-ce87bbe2602b',
-    run_id: uuidv4(),
-    source: 'playwright-test',
-    metadata: {
-      component: 'patchman',
-      description: 'Test for TestHistoryTable',
-      env: 'stage',
-      markers: ['test', 'playwright'],
-      title: testId,
-      jenkins: {
-        build_number: '123',
-        build_url: 'http://example.com/jenkins/123',
-        job_name: 'test-job',
-      },
-    },
-  };
-}
 
 test.describe('TestHistoryTable Component', () => {
   let authToken;
