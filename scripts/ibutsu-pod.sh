@@ -195,6 +195,7 @@ podman run -d \
     -e CELERY_BROKER_URL=redis://127.0.0.1:6379 \
     -e CELERY_RESULT_BACKEND=redis://127.0.0.1:6379 \
     -e SQLALCHEMY_WARN_20=1 \
+    -e GUNICORN_TIMEOUT=30 \
     "${BACKEND_EXTRA_ARGS[@]}" \
     -w /mnt \
     -v ./backend:/mnt/:z \
