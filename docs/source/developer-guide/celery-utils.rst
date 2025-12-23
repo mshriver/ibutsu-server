@@ -59,6 +59,7 @@ Creates a minimal broker-only Celery app for monitoring purposes.
 
 * Reads ``CELERY_BROKER_URL`` from environment (required)
 * Reads ``CELERY_RESULT_BACKEND`` from environment (optional, defaults to broker URL)
+* Maps environment variables to Celery 6-compatible config keys (``broker_url``, ``result_backend``)
 * Configures Redis socket timeouts and retry behavior
 * Does NOT import task modules
 * Does NOT require database access
@@ -82,6 +83,11 @@ Creates a minimal broker-only Celery app for monitoring purposes.
 
    CELERY_BROKER_URL=redis://:password@redis.example.com:6379/0
    CELERY_RESULT_BACKEND=redis://:password@redis.example.com:6379/0  # Optional
+
+.. note::
+   These environment variable names use the legacy ``CELERY_`` prefix for backwards compatibility.
+   The application automatically maps them to Celery 6-compatible configuration keys
+   (``broker_url`` and ``result_backend``) to avoid deprecation warnings.
 
 **Raises:**
 

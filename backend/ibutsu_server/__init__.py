@@ -117,13 +117,6 @@ def get_app(**extra_config):
                     break
             engine.dispose()
 
-        # Set celery broker URL
-        # hackishly indented to only be part of the setup where extra config won't pass the db
-        config.update(
-            CELERY_BROKER_URL=check_envvar(config, envvar="CELERY_BROKER_URL"),
-            CELERY_RESULT_BACKEND=check_envvar(config, envvar="CELERY_RESULT_BACKEND"),
-        )
-
     # Load any extra config
     config.update(extra_config)
 
@@ -142,10 +135,11 @@ def get_app(**extra_config):
 
     # Configure Celery in the Flask app config
     # Using Celery 6-compatible configuration keys
+    # Read directly from environment variables to avoid setting deprecated top-level config keys
     config.from_mapping(
         CELERY={
-            "broker_url": config.get("CELERY_BROKER_URL"),
-            "result_backend": config.get("CELERY_RESULT_BACKEND"),
+            "broker_url": check_envvar(config, envvar="CELERY_BROKER_URL"),
+            "result_backend": check_envvar(config, envvar="CELERY_RESULT_BACKEND"),
             "broker_connection_retry": True,
             "broker_connection_retry_on_startup": True,
             "worker_cancel_long_running_tasks_on_connection_loss": True,

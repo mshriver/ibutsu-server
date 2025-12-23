@@ -61,6 +61,10 @@ Flower App (Broker-Only Monitoring)
    - CELERY_RESULT_BACKEND: redis://:$(REDIS_PASSWORD)@redis.svc:6379
    - FLOWER_BASIC_AUTH: username:password  # For web UI authentication
 
+.. note::
+   Environment variables ``CELERY_BROKER_URL`` and ``CELERY_RESULT_BACKEND`` are automatically
+   mapped to Celery 6-compatible config keys (``broker_url`` and ``result_backend``).
+
 **Environment Variables NOT Required:**
 
 * ❌ POSTGRESQL_HOST
@@ -101,6 +105,9 @@ Worker App (Flask-Integrated Task Execution)
    - POSTGRESQL_USER: <from secret>
    - POSTGRESQL_PASSWORD: <from secret>
    - POSTGRESQL_DATABASE: <from secret>
+
+.. note::
+   Environment variables are mapped to Celery 6-compatible config keys internally.
 
 **Features:**
 
@@ -143,6 +150,9 @@ Scheduler App (Flask-Integrated Periodic Tasks)
    - POSTGRESQL_USER: <from secret>
    - POSTGRESQL_PASSWORD: <from secret>
    - POSTGRESQL_DATABASE: <from secret>
+
+.. note::
+   Environment variables are mapped to Celery 6-compatible config keys internally.
 
 **Features:**
 

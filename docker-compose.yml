@@ -23,6 +23,7 @@ services:
       POSTGRESQL_DATABASE: ibutsu
       POSTGRESQL_USER: ibutsu
       POSTGRESQL_PASSWORD: ibutsu
+      # Celery configuration (mapped to Celery 6 config keys internally)
       CELERY_BROKER_URL: 'redis://redis'
       CELERY_RESULT_BACKEND: 'redis://redis'
       IBUTSU_SUPERADMIN_EMAIL: admin@example.com

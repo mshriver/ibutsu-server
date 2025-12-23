@@ -3,6 +3,11 @@
 OKD/OpenShift Template
 ======================
 
+.. note::
+   The environment variables ``CELERY_BROKER_URL`` and ``CELERY_RESULT_BACKEND`` in this template
+   are automatically mapped to Celery 6-compatible configuration keys (``broker_url`` and
+   ``result_backend``) by the application to avoid deprecation warnings.
+
 .. code:: yaml
 
   kind: Template

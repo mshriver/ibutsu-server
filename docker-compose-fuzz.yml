@@ -25,6 +25,7 @@ services:
       IBUTSU_SUPERADMIN_PASSWORD: admin12345
       IBUTSU_SUPERADMIN_NAME: Administrator
       JWT_SECRET: jwtsecret
+      # Celery configuration (mapped to Celery 6 config keys internally)
       CELERY_BROKER_URL: 'redis://redis'
       CELERY_RESULT_BACKEND: 'redis://redis'
     build:

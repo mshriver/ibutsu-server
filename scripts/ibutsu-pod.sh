@@ -394,7 +394,7 @@ else
 fi
 echo -n "Waiting for celery to respond: "
 sleep 5
-until podman exec ibutsu-worker celery inspect ping -d celery@ibutsu 2>/dev/null | grep -q pong; do
+until podman exec ibutsu-worker celery --app ibutsu_server:worker_app inspect ping 2>/dev/null | grep -q pong; do
     echo -n ' .'
     sleep 2
 done

@@ -1,6 +1,10 @@
+# Database configuration
 POSTGRESQL_HOST: localhost
 POSTGRESQL_DATABASE: ibutsu
 POSTGRESQL_USER: ibutsu
 POSTGRESQL_PASSWORD: ibutsu
+
+# Celery configuration
+# These environment variables are mapped to Celery 6 config keys (broker_url, result_backend) internally
 CELERY_BROKER_URL: redis://localhost:6379
 CELERY_RESULT_BACKEND: redis://localhost:6379

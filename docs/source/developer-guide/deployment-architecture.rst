@@ -516,8 +516,8 @@ Container Won't Start
 
 **Common issues:**
 
-* Missing ``CELERY_BROKER_URL`` environment variable
-* Missing ``CELERY_RESULT_BACKEND`` environment variable
+* Missing ``CELERY_BROKER_URL`` environment variable (mapped to Celery 6 ``broker_url`` config)
+* Missing ``CELERY_RESULT_BACKEND`` environment variable (mapped to Celery 6 ``result_backend`` config)
 * Database connection failure (wrong credentials/host)
 * Port 8080 already in use
 

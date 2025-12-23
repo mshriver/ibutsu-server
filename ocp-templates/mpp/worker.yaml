@@ -55,6 +55,7 @@ objects:
               secretKeyRef:
                 key: database-password
                 name: redis
+          # Celery configuration - mapped to Celery 6 config keys (broker_url, result_backend) internally
           - name: CELERY_BROKER_URL
             value: redis://:${REDIS_PASSWORD}@redis.${NAMESPACE}.svc
           - name: CELERY_RESULT_BACKEND

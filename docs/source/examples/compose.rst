@@ -3,6 +3,11 @@
 Docker/Podman Compose
 =====================
 
+.. note::
+   The environment variables ``CELERY_BROKER_URL`` and ``CELERY_RESULT_BACKEND`` in this example
+   are automatically mapped to Celery 6-compatible configuration keys (``broker_url`` and
+   ``result_backend``) by the application to avoid deprecation warnings.
+
 .. code:: yaml
 
    version: '3'
