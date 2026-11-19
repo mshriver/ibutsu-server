@@ -7,7 +7,10 @@ metadata:
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "main" && ( "backend/***".pathChanged() || ".tekton/ibutsu-worker-push.yaml".pathChanged() )
+    pipelinesascode.tekton.dev/on-cel-expression: >-
+      event == "push" && (git_tag != "" ||
+      (target_branch == "main" && ("backend/***".pathChanged() ||
+      ".tekton/ibutsu-worker-push.yaml".pathChanged())))
   labels:
     appstudio.openshift.io/application: ibutsu
     appstudio.openshift.io/component: ibutsu-worker
@@ -26,6 +29,8 @@ spec:
     value: docker/Dockerfile.worker
   - name: path-context
     value: backend
+  - name: image-version
+    value: '{{git_tag}}'
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
@@ -113,6 +118,10 @@ spec:
       type: string
       default: 'false'
       description: When "true", omit the build history (history timestamps, layer metadata, etc.) from the resulting image.
+    - default: ""
+      description: OCI image version, set to the Git release tag for tag builds.
+      name: image-version
+      type: string
     results:
     - description: ""
       name: IMAGE_URL
@@ -211,6 +220,11 @@ spec:
       - name: BUILD_ARGS
         value:
         - $(params.build-args[*])
+      - name: BUILD_ARGS_FILE
+        value: $(params.build-args-file)
+      - name: LABELS
+        value:
+        - org.opencontainers.image.version=$(params.image-version)
       - name: PRIVILEGED_NESTED
         value: $(params.privileged-nested)
       - name: SOURCE_URL
