@@ -26,6 +26,20 @@
   ],
   "packageRules": [
     {
+      "description": "Renovate does not keep frontend/yarn.lock consistent; do not update frontend dependencies. packageManager (yarn tooling) is still handled by the rules below",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchFileNames": [
+        "frontend/package.json"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "devDependencies"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Upgrade Yarn/Corepack tooling separately from app deps; keep reviews focused on Corepack + Yarn 4 in MintMaker and the frontend image",
       "matchPackageNames": [
         "yarn",
